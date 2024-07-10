@@ -1,0 +1,22 @@
+{
+  "name": "audio-visualizer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon index",
+    "start": "node index",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "koa": "^2.15.3",
+    "koa-static": "^5.0.0",
+    "three": "^0.166.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
