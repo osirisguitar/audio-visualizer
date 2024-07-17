@@ -150,13 +150,13 @@ async function init() {
   const spaceTexture = spaceLoader.load('stars.jpg', (texture) => {
     texture.wrapS = THREE.RepeatWrapping
     texture.wrapT = THREE.RepeatWrapping
-    texture.repeat.set(5, 150)
+    texture.repeat.set(30, 150)
     texture.needsUpdate = true
   })
 
   texture.colorSpace = THREE.SRGBColorSpace
 
-  const spaceGeometry = new THREE.CylinderGeometry(30, 30, 5000, 32, 1, true)
+  const spaceGeometry = new THREE.CylinderGeometry(100, 100, 5000, 32, 1, true)
   const spaceMaterial = new THREE.MeshBasicMaterial({
     color: 0x444444,
     map: spaceTexture,
