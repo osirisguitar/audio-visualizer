@@ -261,6 +261,7 @@ function animate() {
   camera.updateProjectionMatrix()
 
   analyser.getByteFrequencyData(dataArray)
+  console.log('dataArray', dataArray.length)
   for (let i = 0; i < bufferLength; i++) {
     bars[i].scale.y = dataArray[i] / 255 / 2
     bars[i].position.y = (dataArray[i] / 255) * 0.75

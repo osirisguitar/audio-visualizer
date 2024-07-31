@@ -1,22 +1,17 @@
 {
-  "name": "audio-visualizer",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "my-vue-app",
+  "private": true,
+  "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "nodemon index",
-    "start": "node index",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "koa": "^2.15.3",
-    "koa-static": "^5.0.0",
-    "three": "^0.166.1"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "vite": "^5.3.4"
+  },
+  "dependencies": {
+    "three": "^0.166.1"
   }
 }
