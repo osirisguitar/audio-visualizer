@@ -1,11 +1,12 @@
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/addons'
-import { FBXLoader } from 'three/addons'
 import { EffectComposer } from 'three/addons'
 import { RenderPass } from 'three/addons'
 import { ShaderPass } from 'three/addons'
 import { UnrealBloomPass } from 'three/addons'
 import { OutputPass } from 'three/addons'
+import { logo, createLogo, setLogoColors } from './logo'
+import { loadModel, rotateAboutPoint } from '../../public/utils'
+import { camera, createCamera, setCameraMode, updateCamera } from './camera'
 
 let audio1 = new Audio()
 audio1.src = '/synthwave11e.mp3'
@@ -14,7 +15,7 @@ const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
 let audioSource = null
 let analyser = null
 
-audio1.volume = 0.25
+audio1.volume = 1
 audio1.play()
 audioSource = audioCtx.createMediaElementSource(audio1)
 analyser = audioCtx.createAnalyser()
@@ -33,57 +34,17 @@ const materials = {}
 
 let bloomComposer
 let finalComposer
-let camera
 let scene
-let gltfLoader = new GLTFLoader()
-let fbxLoader = new FBXLoader()
 let ambientLight
 let spotlight
 let renderer
-let logo
 let f1
-/*let tires = []
-let rims = []
-let tireDecals = []
-let leftFrontTire
-let leftFrontRim
-let rightFrontTire
-let rightFrontRim
-let leftFrontDecalOutside
-let leftFrontDecalInside
-let leftFrontWheel
-let rightFrontDecalOutside
-let rightFrontDecalInside
-let rightFrontWheel*/
 let leftFrontWheel
 let rightFrontWheel
 let leftRearWheel
 let rightRearWheel
 let keyRotationObject
 let floor
-let lastFrequency = 0
-let logoBaseColor
-
-const createCamera = (aspectRatio) => {
-  const camera = new THREE.PerspectiveCamera(40, aspectRatio, 0.1, 5000)
-
-  //camera.position.set(0, 500, 5000)
-  camera.position.set(0, 0.1, 0.5)
-  camera.lookAt(0, 0, 0)
-
-  const width = window.innerWidth * window.devicePixelRatio
-  const height = window.innerHeight * window.devicePixelRatio
-
-  camera.viewport = new THREE.Vector4(
-    Math.floor(width),
-    Math.floor(height),
-    Math.ceil(width),
-    Math.ceil(height)
-  )
-  camera.updateMatrixWorld()
-
-  return camera
-}
 
 const createAmbientLight = (color) => {
   return new THREE.AmbientLight(color)
@@ -100,64 +61,14 @@ const createDirectionalLight = (color, intensity) => {
   return light
 }
 
-const loadModel = async (filename) => {
-  let loader = gltfLoader
-  if (filename.toLowerCase().endsWith('.fbx')) {
-    loader = fbxLoader
-  }
-
-  return new Promise((resolve, reject) => {
-    try {
-      loader.load(filename, (model) => {
-        console.log(model)
-        if (model.scene) {
-          model = model.scene
-        }
-        return resolve(model)
-      })
-    } catch (error) {
-      console.error('Error loading model ' + filename, error)
-      reject(error)
-    }
-  })
-}
-
-const createLogo = async () => {
-  try {
-    const logoModel = await loadModel('/osiris-dreams-logo.glb')
-    logoModel.castShadow
-    let logo = logoModel
-    logo.castShadow = true
-
-    logo.traverse((child) => {
-      child.castShadow = true
-    })
-
-    logo.position.x = -14
-    logo.position.z = 240
-    logo.position.y = -0.3
-    logo.scale.set(100, 100, 100)
-
-    /*    logo.position.x = -65
-    logo.position.z = 1000
-    logo.position.y = -1
-    logo.scale.set(100, 100, 100)*/
-    logo.rotation.set(-Math.PI / 2, 0, -Math.PI / 2)
-    logoBaseColor = logo.children[1].material.color
-    return logo
-  } catch (error) {
-    console.error(error)
-  }
-}
-
 const createF1 = async () => {
   try {
     let f1Model = await loadModel('formula1b.glb')
     f1Model.receiveShadow = true
     let f1 = f1Model
-    ///    f1.scale.set(0.5, 0.5, 0.5)
     f1.scale.set(0.1, 0.1, 0.1)
     f1.rotation.set(0, 0, 0)
+    f1.position.set(0, 0, -2)
     f1.receiveShadow = true
 
     const wheels = {
@@ -171,64 +82,8 @@ const createF1 = async () => {
       if (child.isMesh) {
         child.material.color = new THREE.Color('Lime')
 
-        console.log(child)
         child.material.wireframe = true
         child.layers.enable(BLOOM_SCENE)
-        /*if (child.name.startsWith('Tire_')) {
-          tires.push(child)
-          switch (child.name) {
-            case 'Tire_FL':
-              leftFrontTire = child
-              break
-            case 'Tire_FK':
-              rightFrontTire = child
-              break
-            default:
-              break
-          }
-        } else if (child.name.startsWith('Rim_')) {
-          switch (child.name) {
-            case 'Rim_FL':
-              leftFrontRim = child
-              break
-            default:
-              break
-          }
-          rims.push(child)
-        } else if (child.name.startsWith('Decal_Tire_')) {
-          tireDecals.push(child)
-          switch (child.name) {
-            case 'Decal_Tire_FL001':
-              leftFrontDecalOutside = child
-              break
-            case 'Decal_Tire_FL002':
-              // leftRearOutside
-              break
-            case 'Decal_Tire_FL003':
-              // leftRearInside
-              //leftFrontDecalOutside = child
-              break
-            case 'Decal_Tire_FL004':
-              // rightFrontInside
-              rightFrontDecalInside = child
-              break
-            case 'Decal_Tire_FL0005':
-              // ?
-              break
-            case 'Decal_Tire_FL0006':
-              child.rotation.x += 1
-              break
-            case 'Decal_Tire_FL0007':
-              child.rotation.x += 1
-              break
-            case 'Decal_Tire_FL':
-              // rightFrontInside
-              leftFrontDecalInside = child
-              break
-            default:
-              break
-          }
-        }*/
       }
       child.castShadow = true
     })
@@ -286,14 +141,11 @@ const createF1 = async () => {
 const createFloor = () => {
   const colorLinesCenter = new THREE.Color('gray')
   const colorLinesGrid = new THREE.Color('gray')
-  const floor = new THREE.GridHelper(700, 125, colorLinesCenter, colorLinesGrid)
-  console.log(floor)
+  const floor = new THREE.GridHelper(700, 250, colorLinesCenter, colorLinesGrid)
   floor.material.linewidth = 6
 
   floor.position.x = 80
   floor.position.z = 250
-
-  //floor.rotation.x = -Math.PI / 2
 
   return floor
 }
@@ -334,12 +186,6 @@ const onKeyDown = (evt) => {
     default:
       break
   }
-  console.log(
-    keyRotationObject.rotation.x,
-    keyRotationObject.rotation.y,
-    keyRotationObject.rotation.z,
-    spotlight.position.x
-  )
 }
 
 let angle = 0
@@ -363,114 +209,717 @@ const render = () => {
   scene.traverse(darkenNonBloomed)
   bloomComposer.render()
   scene.traverse(restoreMaterial)
-
-  // render the entire scene, then render bloom scene on top
   finalComposer.render()
-  //  renderer.render(scene, camera)
-}
-
-function getColorForValue(value) {
-  const red = (0xf5 - 0x23) * (value / 255) + 0x23
-  const green = (0x59 - 0x40) * (value / 255) + 0x40
-  const blue = (0xf0 - 0xac) * (value / 255) + 0xac
-
-  return new THREE.Color(
-    (red - 150) / 255,
-    (green - 50) / 255,
-    (blue - 150) / 255
-  )
-}
-
-// obj - your object (THREE.Object3D or derived)
-// point - the point of rotation (THREE.Vector3)
-// axis - the axis of rotation (normalized THREE.Vector3)
-// theta - radian value of rotation
-// pointIsWorld - boolean indicating the point is in world coordinates (default = false)
-function rotateAboutPoint(obj, point, axis, theta, pointIsWorld = false) {
-  if (pointIsWorld) {
-    obj.parent.localToWorld(obj.position) // compensate for world coordinate
-  }
-
-  obj.position.sub(point) // remove the offset
-  obj.position.applyAxisAngle(axis, theta) // rotate the POSITION
-  obj.position.add(point) // re-add the offset
-
-  if (pointIsWorld) {
-    obj.parent.worldToLocal(obj.position) // undo world coordinates compensation
-  }
-
-  obj.rotateOnAxis(axis, theta) // rotate the OBJECT
 }
 
 const spinWheel = (wheel) => {
   if (wheel) {
     wheel.children[0].rotation.x -= 0.15
-    wheel.children[1].rotation.z += 0.15
+    wheel.children[1].rotation.z -= 0.15
   }
 }
 
 let wheelLock = Math.PI / 6
-let wheelTurn = 0.01
+let wheelTurn = 0
 let currentWheelTurn = 0
 
+const turnWheels = (finalAngle) => {
+  wheelLock = finalAngle
+  wheelTurn = finalAngle > currentWheelTurn ? 0.05 : -0.05
+}
+
+let fullSpeed = 0.1
+let currentSpeed = fullSpeed
+let currentTurnRate = 0
+let destinationAngle = null
+
+const turnCar = (finalAngle) => {
+  destinationAngle = finalAngle
+  currentTurnRate = f1.rotation.y < destinationAngle ? 0.03 : -0.03
+}
+
+let currentKeyframeIndex = 0
+const keyframes = [
+  {
+    // F0
+    condition: () => {
+      return f1.position.z > 40
+    },
+    transformation: () => {
+      setCameraMode('sidepod')
+      return true
+    },
+  },
+  {
+    // F1
+    condition: () => {
+      return f1.position.z > 76
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar(Math.PI / 2)
+      return true
+    },
+  },
+  {
+    // F2
+    condition: () => {
+      return f1.position.x > 8
+    },
+    transformation: () => {
+      //setCameraMode('above')
+      setCameraMode('aheadside')
+      return true
+    },
+  },
+  {
+    // F3
+    condition: () => {
+      return f1.position.x > 20
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar(0)
+      return true
+    },
+  },
+  {
+    // F4
+    condition: () => {
+      return f1.position.z > 108
+    },
+    transformation: () => {
+      setCameraMode('godseye')
+      return true
+    },
+  },
+  {
+    // F5
+    condition: () => {
+      return f1.position.z > 108
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar(-Math.PI / 4)
+      return true
+    },
+  },
+  {
+    // F6
+    condition: () => {
+      return f1.position.x < 2
+    },
+    transformation: () => {
+      setCameraMode('onboard')
+      return true
+    },
+  },
+  {
+    // F7
+    condition: () => {
+      return f1.position.x < 0
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar(0)
+      return true
+    },
+  },
+  {
+    // F9
+    condition: () => {
+      return f1.position.z > 157.5
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar(Math.PI / 2)
+      return true
+    },
+  },
+  {
+    // F10
+    condition: () => {
+      return f1.position.x > 10
+    },
+    transformation: () => {
+      setCameraMode('above')
+      return true
+    },
+  },
+  {
+    // F11
+    condition: () => {
+      return f1.position.x > 20
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar(0)
+      return true
+    },
+  },
+  {
+    // F12
+    condition: () => {
+      return f1.position.z > 190
+    },
+    transformation: () => {
+      setCameraMode('sidepod')
+      return true
+    },
+  },
+  {
+    // F13
+    condition: () => {
+      return f1.position.z > 220
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar(-Math.PI / 4)
+      return true
+    },
+  },
+  {
+    // F14
+    condition: () => {
+      return f1.position.x < 14
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar(0)
+      return true
+    },
+  },
+  {
+    // F15
+    condition: () => {
+      return f1.position.z > 260
+    },
+    transformation: () => {
+      setCameraMode('above')
+      return true
+    },
+  },
+  {
+    // F16
+    condition: () => {
+      return f1.position.z > 260
+    },
+    transformation: () => {
+      setCameraMode('above')
+      return true
+    },
+  },
+  {
+    // F17
+    condition: () => {
+      return f1.position.z > 270
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar(-Math.PI / 4)
+      return true
+    },
+  },
+  {
+    // F18
+    condition: () => {
+      return f1.position.z > 275
+    },
+    transformation: () => {
+      setCameraMode('aheadside')
+      return true
+    },
+  },
+  {
+    // F19
+    condition: () => {
+      return f1.position.z > 283
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar(0)
+      return true
+    },
+  },
+  {
+    // F20
+    condition: () => {
+      return f1.position.z > 354
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar(Math.PI / 2)
+      return true
+    },
+  },
+  {
+    // F21
+    condition: () => {
+      return f1.position.x > 20
+    },
+    transformation: () => {
+      setCameraMode('above')
+      return true
+    },
+  },
+  {
+    // F22
+    condition: () => {
+      return f1.position.x > 31
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar(0)
+      return true
+    },
+  },
+  {
+    // F23
+    condition: () => {
+      return f1.position.z > 390
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar(-Math.PI / 2)
+      return true
+    },
+  },
+  {
+    // F25
+    condition: () => {
+      return f1.position.x < 5
+    },
+    transformation: () => {
+      setCameraMode('onboard')
+      return true
+    },
+  },
+  {
+    // F25
+    condition: () => {
+      return f1.position.x < 3
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar(0)
+      return true
+    },
+  },
+  {
+    // F14
+    condition: () => {
+      return f1.position.z > 425
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar(Math.PI / 2)
+      return true
+    },
+  },
+  {
+    // F15
+    condition: () => {
+      return f1.position.x > 11
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar(0)
+      return true
+    },
+  },
+  {
+    // F16
+    condition: () => {
+      return f1.position.z > 475
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar(Math.PI)
+      return true
+    },
+  },
+  {
+    // F17
+    condition: () => {
+      return f1.position.z < 437
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar((Math.PI * 3) / 4)
+      return true
+    },
+  },
+  {
+    // F18
+    condition: () => {
+      return f1.position.z < 427
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar(Math.PI / 2)
+      return true
+    },
+  },
+  {
+    // F19
+    condition: () => {
+      return f1.position.x > 64
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar(Math.PI / 4)
+      return true
+    },
+  },
+  {
+    // F20
+    condition: () => {
+      return f1.position.x > 85
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar(0)
+      return true
+    },
+  },
+  {
+    // F21
+    condition: () => {
+      return f1.position.z > 485
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar(Math.PI / 4)
+      return true
+    },
+  },
+  {
+    // F22
+    condition: () => {
+      return f1.position.x > 98
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar(Math.PI)
+      return true
+    },
+  },
+  {
+    // F23
+    condition: () => {
+      return f1.position.z < 416
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar(Math.PI / 2)
+      return true
+    },
+  },
+  {
+    // F24
+    condition: () => {
+      return f1.position.x > 144
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar(Math.PI)
+      return true
+    },
+  },
+  {
+    // F25
+    condition: () => {
+      return f1.position.z < 363
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar((Math.PI * 5) / 4)
+      return true
+    },
+  },
+  {
+    // F25
+    condition: () => {
+      return f1.position.x < 136
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar(Math.PI)
+      return true
+    },
+  },
+  {
+    // F26
+    condition: () => {
+      return f1.position.z < 316
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar((Math.PI * 5) / 4)
+      return true
+    },
+  },
+  {
+    // F27
+    condition: () => {
+      return f1.position.x < 107
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar(Math.PI)
+      return true
+    },
+  },
+  {
+    // F28
+    condition: () => {
+      return f1.position.z < 255.5
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar(Math.PI / 2)
+      return true
+    },
+  },
+  {
+    // F29
+    condition: () => {
+      return f1.position.x > 134
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar((Math.PI * 3) / 4)
+      return true
+    },
+  },
+  {
+    // F30
+    condition: () => {
+      return f1.position.z < 241
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar(Math.PI)
+      return true
+    },
+  },
+  {
+    // F31
+    condition: () => {
+      return f1.position.z < 206
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar((Math.PI * 11) / 8)
+      return true
+    },
+  },
+  {
+    // F32
+    condition: () => {
+      return f1.position.x < 121
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar((Math.PI * 3) / 2)
+      return true
+    },
+  },
+  {
+    // F33
+    condition: () => {
+      return f1.position.x < 110
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar(Math.PI)
+      return true
+    },
+  },
+  {
+    // F34
+    condition: () => {
+      return f1.position.z < 102
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar(Math.PI / 2)
+      return true
+    },
+  },
+  {
+    // F35
+    condition: () => {
+      return f1.position.x > 122
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar(0)
+      return true
+    },
+  },
+  {
+    // F36
+    condition: () => {
+      return f1.position.z > 150
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar(Math.PI)
+      return true
+    },
+  },
+  {
+    // F37
+    condition: () => {
+      return f1.position.z < 112
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar((Math.PI * 3) / 4)
+      return true
+    },
+  },
+  {
+    // F38
+    condition: () => {
+      return f1.position.x > 146.5
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar(Math.PI)
+      return true
+    },
+  },
+  {
+    // F39
+    condition: () => {
+      return f1.position.z < 63
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar(Math.PI / 2)
+      return true
+    },
+  },
+  {
+    // F40
+    condition: () => {
+      return f1.position.x > 164
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar(Math.PI)
+      return true
+    },
+  },
+  {
+    // F41
+    condition: () => {
+      return f1.position.z < 36
+    },
+    transformation: () => {
+      turnWheels(Math.PI / 6)
+      turnCar((Math.PI * 3) / 2)
+      return true
+    },
+  },
+  {
+    // F42
+    condition: () => {
+      return f1.position.x < 151
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
+      turnCar(Math.PI)
+      return true
+    },
+  },
+]
+
 const animate = () => {
+  const currentKeyframe =
+    currentKeyframeIndex < keyframes.length
+      ? keyframes[currentKeyframeIndex]
+      : null
+
+  if (currentKeyframe && currentKeyframe.condition()) {
+    console.log('frame', currentKeyframeIndex, f1.position.x, f1.position.z)
+    if (currentKeyframe.transformation()) {
+      currentKeyframeIndex++
+    }
+  }
+
   spinWheel(leftFrontWheel)
   spinWheel(rightFrontWheel)
   spinWheel(leftRearWheel)
   spinWheel(rightRearWheel)
 
-  rotateAboutPoint(
-    rightFrontWheel,
-    rightFrontWheel.children[0].position,
-    new THREE.Vector3(0, 1, 0),
-    wheelTurn
+  if (wheelTurn !== 0) {
+    rotateAboutPoint(
+      rightFrontWheel,
+      rightFrontWheel.children[0].position,
+      new THREE.Vector3(0, 1, 0),
+      wheelTurn
+    )
+    rotateAboutPoint(
+      leftFrontWheel,
+      leftFrontWheel.children[0].position,
+      new THREE.Vector3(0, 1, 0),
+      wheelTurn
+    )
+
+    currentWheelTurn += wheelTurn
+    if (
+      (wheelTurn > 0 && currentWheelTurn > wheelLock) ||
+      (wheelTurn < 0 && wheelLock > currentWheelTurn)
+    ) {
+      wheelTurn = 0
+    }
+  }
+
+  if (currentTurnRate !== 0) {
+    f1.rotation.y += currentTurnRate
+    if (
+      (currentTurnRate > 0 && f1.rotation.y > destinationAngle) ||
+      (currentTurnRate < 0 && f1.rotation.y < destinationAngle)
+    ) {
+      currentTurnRate = 0
+      f1.rotation.y = destinationAngle
+      destinationAngle = 0
+      currentSpeed = fullSpeed
+      turnWheels(0)
+    }
+  }
+
+  const euler = new THREE.Euler(
+    f1.rotation.x,
+    f1.rotation.y,
+    f1.rotation.z,
+    'XYZ'
   )
-  rotateAboutPoint(
-    leftFrontWheel,
-    leftFrontWheel.children[0].position,
-    new THREE.Vector3(0, 1, 0),
-    wheelTurn
-  )
+  const quat = new THREE.Quaternion().setFromEuler(euler)
+  const vector = new THREE.Vector3(0, 0, currentSpeed).applyQuaternion(quat)
 
-  currentWheelTurn += wheelTurn
+  f1.position.add(vector)
 
-  if (Math.abs(currentWheelTurn) > wheelLock) {
-    wheelTurn = -wheelTurn
-  }
+  updateCamera(f1)
 
-  f1.position.z += 0.1
-  camera.position.z = f1.position.z + Math.max(camera.position.y * 3, 0.5)
-  camera.position.x = -Math.cos(angle) * radius // + camera.position.y / 5)
-
-  if (camera.position.y > 0.1) {
-    camera.position.y -= camera.position.y / 300
-  }
-
-  if (angle >= 360) {
-    angle = 0
-  }
-
-  angle += 0.002
-
-  camera.lookAt(f1.position.x, f1.position.y, f1.position.z)
+  const maxGray = 0.8
+  floor.material.color.r = Math.min(10 / camera.position.y, maxGray)
+  floor.material.color.g = Math.min(10 / camera.position.y, maxGray)
+  floor.material.color.b = Math.min(10 / camera.position.y, maxGray)
 
   analyser.getByteFrequencyData(dataArray)
-  const currentFrequency = dataArray[5]
-
-  if (Math.abs(currentFrequency - lastFrequency) > 1) {
-    //logo.children[1].material.color = getColorForValue(currentFrequency)
-    //floor.material.color = getColorForValue(currentFrequency)
-    logo.children[1].material.color = new THREE.Color(
-      logoBaseColor.r + currentFrequency / 512 - 0.25,
-      logoBaseColor.g + currentFrequency / 512 - 0.25,
-      logoBaseColor.b + currentFrequency / 512 - 0.25
-    )
-  }
-  lastFrequency = currentFrequency
-
-  //  spotlight.target.position.set(f1.position.x, f1.position.y, f1.position.z)
+  setLogoColors(dataArray)
 
   render()
+}
+
+// Set animation current state
+const setAnimationFrame = (frame, x, z) => {
+  f1.position.set(x, 0, z)
+  currentKeyframeIndex = frame
 }
 
 const createScene = async () => {
@@ -481,7 +930,7 @@ const createScene = async () => {
     exposure: 0.5,
   }
 
-  camera = createCamera(window.innerWidth / window.innerHeight)
+  createCamera(window.innerWidth / window.innerHeight)
   scene = new THREE.Scene()
 
   const renderScene = new RenderPass(scene, camera)
@@ -502,12 +951,10 @@ const createScene = async () => {
   scene.add(spotlight)
   scene.add(spotlight.target)
 
-  logo = await createLogo()
+  await createLogo()
   scene.add(logo)
 
   f1 = await createF1()
-  console.log(f1)
-
   scene.add(f1)
 
   floor = createFloor()
@@ -523,7 +970,7 @@ const createScene = async () => {
   renderer.setSize(window.innerWidth, window.innerHeight)
   renderer.setAnimationLoop(animate)
   renderer.shadowMap.enabled = true
-  //  renderer.toneMapping = THREE.ReinhardToneMapping
+  renderer.toneMapping = THREE.ReinhardToneMapping
 
   document.body.appendChild(renderer.domElement)
 
@@ -568,6 +1015,14 @@ const createScene = async () => {
 
   window.addEventListener('resize', onWindowResize)
   window.addEventListener('keydown', onKeyDown)
+  window.addEventListener('mousedown', () => {
+    console.log(f1.position.x, f1.position.z)
+    console.log(f1.rotation)
+    console.log(camera.rotation)
+  })
+
+  //f1.rotation.y = Math.PI
+  //setAnimationFrame(40, 147.48164755483327, 80.43642102212316)
 }
 
 createScene()
