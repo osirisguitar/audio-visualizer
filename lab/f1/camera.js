@@ -38,6 +38,16 @@ const cameraModes = {
     lookat: new THREE.Vector3(0, 0, 1),
     dynamic: true,
   },
+  followfar: {
+    camera: new THREE.Vector3(0, 1.5, -4),
+    lookat: new THREE.Vector3(0, 0, 5),
+    dynamic: true,
+  },
+  followside: {
+    camera: new THREE.Vector3(-0.5, 0.1, -0.8),
+    lookat: new THREE.Vector3(0, 0, 0.1),
+    dynamic: true,
+  },
   ahead: {
     camera: new THREE.Vector3(0, 0.2, 1),
     lookat: new THREE.Vector3(0, 0, -1),
@@ -66,6 +76,11 @@ const cameraModes = {
   above: {
     camera: new THREE.Vector3(0, 200, 0),
     lookat: new THREE.Vector3(0, 0, -1),
+    dynamic: true,
+  },
+  aboveclose: {
+    camera: new THREE.Vector3(0, 30, 0),
+    lookat: new THREE.Vector3(0, 0, 0),
     dynamic: true,
   },
   godseye: {

@@ -6,16 +6,18 @@ const lastFrequencies = [0, 0]
 
 export let logo
 
+const quota = 400
+const dampening = 0
+
 export const setLogoColors = (dataArray) => {
   for (let i = 0; i < 2; i++) {
     const currentFrequency = dataArray[5]
 
-    //    if (Math.abs(currentFrequency - lastFrequencies[i]) > 1) {
-    if (currentFrequency > 100) {
+    if (currentFrequency) {
       logo.children[i].material.color = new THREE.Color(
-        logoBaseColors[i].r + currentFrequency / 512 - 0.25,
-        logoBaseColors[i].g + currentFrequency / 512 - 0.25,
-        logoBaseColors[i].b + currentFrequency / 512 - 0.25
+        logoBaseColors[i].r - 0.5 + currentFrequency / quota - dampening,
+        logoBaseColors[i].g - 0.5 + currentFrequency / quota - dampening,
+        logoBaseColors[i].b - 0.5 + currentFrequency / quota - dampening
       )
     } else {
       logo.children[i].material.color = logoBaseColors[i]
@@ -39,6 +41,7 @@ export const createLogo = async () => {
     logo.position.z = 240
     logo.position.y = -0.3
     logo.scale.set(100, 100, 100)
+    logo.children[0].position.z = 0.01
 
     logo.rotation.set(-Math.PI / 2, 0, -Math.PI / 2)
     logoBaseColors[0] = logo.children[0].material.color

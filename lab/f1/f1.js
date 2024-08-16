@@ -9,14 +9,17 @@ import { loadModel, rotateAboutPoint } from '../../public/utils'
 import { camera, createCamera, setCameraMode, updateCamera } from './camera'
 
 let audio1 = new Audio()
-audio1.src = '/synthwave11e.mp3'
+audio1.src = '/synthwave11f.mp3'
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
 let audioSource = null
 let analyser = null
 
-audio1.volume = 1
-audio1.play()
+audio1.volume = 0.8
+setTimeout(() => {
+  audio1.play()
+}, 1000)
+
 audioSource = audioCtx.createMediaElementSource(audio1)
 analyser = audioCtx.createAnalyser()
 audioSource.connect(analyser)
@@ -32,6 +35,10 @@ bloomLayer.set(BLOOM_SCENE)
 const darkMaterial = new THREE.MeshBasicMaterial({ color: 'black' })
 const materials = {}
 
+let fullscreen = true
+let width = 1280
+let height = 720
+
 let bloomComposer
 let finalComposer
 let scene
@@ -45,6 +52,7 @@ let leftRearWheel
 let rightRearWheel
 let keyRotationObject
 let floor
+let pauseAnimation = false
 
 const createAmbientLight = (color) => {
   return new THREE.AmbientLight(color)
@@ -151,13 +159,17 @@ const createFloor = () => {
 }
 
 const onWindowResize = () => {
-  camera.aspect = window.innerWidth / window.innerHeight
+  if (fullscreen) width = window.innerWidth
+  height = window.innerHeight
+
+  camera.aspect = width / height
   camera.updateProjectionMatrix()
 
-  renderer.setSize(window.innerWidth, window.innerHeight)
+  renderer.setSize(width, height)
 }
 
 const onKeyDown = (evt) => {
+  console.log('"', String.fromCharCode(evt.keyCode), '"')
   switch (String.fromCharCode(evt.keyCode)) {
     case 'Q':
       keyRotationObject.position.x += 0.05
@@ -182,6 +194,10 @@ const onKeyDown = (evt) => {
       break
     case 'F':
       spotlight.target.position.x -= 0.5
+      break
+    case ' ':
+      pauseAnimation = !pauseAnimation
+      console.log(pauseAnimation)
       break
     default:
       break
@@ -241,9 +257,8 @@ const turnCar = (finalAngle) => {
 let currentKeyframeIndex = 0
 const keyframes = [
   {
-    // F0
     condition: () => {
-      return f1.position.z > 40
+      return f1.position.z > 60
     },
     transformation: () => {
       setCameraMode('sidepod')
@@ -251,7 +266,6 @@ const keyframes = [
     },
   },
   {
-    // F1
     condition: () => {
       return f1.position.z > 76
     },
@@ -262,18 +276,15 @@ const keyframes = [
     },
   },
   {
-    // F2
     condition: () => {
       return f1.position.x > 8
     },
     transformation: () => {
-      //setCameraMode('above')
-      setCameraMode('aheadside')
+      setCameraMode('followside')
       return true
     },
   },
   {
-    // F3
     condition: () => {
       return f1.position.x > 20
     },
@@ -284,7 +295,6 @@ const keyframes = [
     },
   },
   {
-    // F4
     condition: () => {
       return f1.position.z > 108
     },
@@ -294,7 +304,6 @@ const keyframes = [
     },
   },
   {
-    // F5
     condition: () => {
       return f1.position.z > 108
     },
@@ -305,7 +314,6 @@ const keyframes = [
     },
   },
   {
-    // F6
     condition: () => {
       return f1.position.x < 2
     },
@@ -315,7 +323,6 @@ const keyframes = [
     },
   },
   {
-    // F7
     condition: () => {
       return f1.position.x < 0
     },
@@ -326,7 +333,6 @@ const keyframes = [
     },
   },
   {
-    // F9
     condition: () => {
       return f1.position.z > 157.5
     },
@@ -337,7 +343,6 @@ const keyframes = [
     },
   },
   {
-    // F10
     condition: () => {
       return f1.position.x > 10
     },
@@ -347,7 +352,6 @@ const keyframes = [
     },
   },
   {
-    // F11
     condition: () => {
       return f1.position.x > 20
     },
@@ -358,7 +362,6 @@ const keyframes = [
     },
   },
   {
-    // F12
     condition: () => {
       return f1.position.z > 190
     },
@@ -368,7 +371,6 @@ const keyframes = [
     },
   },
   {
-    // F13
     condition: () => {
       return f1.position.z > 220
     },
@@ -379,7 +381,6 @@ const keyframes = [
     },
   },
   {
-    // F14
     condition: () => {
       return f1.position.x < 14
     },
@@ -390,7 +391,6 @@ const keyframes = [
     },
   },
   {
-    // F15
     condition: () => {
       return f1.position.z > 260
     },
@@ -400,7 +400,6 @@ const keyframes = [
     },
   },
   {
-    // F16
     condition: () => {
       return f1.position.z > 260
     },
@@ -410,7 +409,6 @@ const keyframes = [
     },
   },
   {
-    // F17
     condition: () => {
       return f1.position.z > 270
     },
@@ -421,7 +419,6 @@ const keyframes = [
     },
   },
   {
-    // F18
     condition: () => {
       return f1.position.z > 275
     },
@@ -431,7 +428,6 @@ const keyframes = [
     },
   },
   {
-    // F19
     condition: () => {
       return f1.position.z > 283
     },
@@ -442,7 +438,24 @@ const keyframes = [
     },
   },
   {
-    // F20
+    condition: () => {
+      return f1.position.z > 300
+    },
+    transformation: () => {
+      setCameraMode('aboveclose')
+      return true
+    },
+  },
+  {
+    condition: () => {
+      return f1.position.z > 340
+    },
+    transformation: () => {
+      setCameraMode('aheadside')
+      return true
+    },
+  },
+  {
     condition: () => {
       return f1.position.z > 354
     },
@@ -453,7 +466,6 @@ const keyframes = [
     },
   },
   {
-    // F21
     condition: () => {
       return f1.position.x > 20
     },
@@ -463,7 +475,6 @@ const keyframes = [
     },
   },
   {
-    // F22
     condition: () => {
       return f1.position.x > 31
     },
@@ -474,7 +485,15 @@ const keyframes = [
     },
   },
   {
-    // F23
+    condition: () => {
+      return f1.position.z > 370
+    },
+    transformation: () => {
+      setCameraMode('above')
+      return true
+    },
+  },
+  {
     condition: () => {
       return f1.position.z > 390
     },
@@ -485,7 +504,15 @@ const keyframes = [
     },
   },
   {
-    // F25
+    condition: () => {
+      return f1.position.x < 25
+    },
+    transformation: () => {
+      setCameraMode('aboveclose')
+      return true
+    },
+  },
+  {
     condition: () => {
       return f1.position.x < 5
     },
@@ -495,7 +522,6 @@ const keyframes = [
     },
   },
   {
-    // F25
     condition: () => {
       return f1.position.x < 3
     },
@@ -506,7 +532,6 @@ const keyframes = [
     },
   },
   {
-    // F14
     condition: () => {
       return f1.position.z > 425
     },
@@ -517,7 +542,6 @@ const keyframes = [
     },
   },
   {
-    // F15
     condition: () => {
       return f1.position.x > 11
     },
@@ -528,7 +552,24 @@ const keyframes = [
     },
   },
   {
-    // F16
+    condition: () => {
+      return f1.position.z > 440
+    },
+    transformation: () => {
+      setCameraMode('above')
+      return true
+    },
+  },
+  {
+    condition: () => {
+      return f1.position.z > 465
+    },
+    transformation: () => {
+      setCameraMode('sidepod')
+      return true
+    },
+  },
+  {
     condition: () => {
       return f1.position.z > 475
     },
@@ -539,7 +580,24 @@ const keyframes = [
     },
   },
   {
-    // F17
+    condition: () => {
+      return f1.position.z < 470
+    },
+    transformation: () => {
+      setCameraMode('aboveclose')
+      return true
+    },
+  },
+  {
+    condition: () => {
+      return f1.position.z < 445
+    },
+    transformation: () => {
+      setCameraMode('onboard')
+      return true
+    },
+  },
+  {
     condition: () => {
       return f1.position.z < 437
     },
@@ -550,7 +608,6 @@ const keyframes = [
     },
   },
   {
-    // F18
     condition: () => {
       return f1.position.z < 427
     },
@@ -561,18 +618,25 @@ const keyframes = [
     },
   },
   {
-    // F19
     condition: () => {
       return f1.position.x > 64
     },
     transformation: () => {
-      turnWheels(Math.PI / 6)
+      turnWheels(-Math.PI / 6)
       turnCar(Math.PI / 4)
       return true
     },
   },
   {
-    // F20
+    condition: () => {
+      return f1.position.x > 75
+    },
+    transformation: () => {
+      setCameraMode('above')
+      return true
+    },
+  },
+  {
     condition: () => {
       return f1.position.x > 85
     },
@@ -583,7 +647,15 @@ const keyframes = [
     },
   },
   {
-    // F21
+    condition: () => {
+      return f1.position.z > 470
+    },
+    transformation: () => {
+      setCameraMode('ahead')
+      return true
+    },
+  },
+  {
     condition: () => {
       return f1.position.z > 485
     },
@@ -594,7 +666,6 @@ const keyframes = [
     },
   },
   {
-    // F22
     condition: () => {
       return f1.position.x > 98
     },
@@ -605,7 +676,24 @@ const keyframes = [
     },
   },
   {
-    // F23
+    condition: () => {
+      return f1.position.z < 480
+    },
+    transformation: () => {
+      setCameraMode('sidepod')
+      return true
+    },
+  },
+  {
+    condition: () => {
+      return f1.position.z < 440
+    },
+    transformation: () => {
+      setCameraMode('aboveclose')
+      return true
+    },
+  },
+  {
     condition: () => {
       return f1.position.z < 416
     },
@@ -616,7 +704,15 @@ const keyframes = [
     },
   },
   {
-    // F24
+    condition: () => {
+      return f1.position.x > 120
+    },
+    transformation: () => {
+      setCameraMode('followfar')
+      return true
+    },
+  },
+  {
     condition: () => {
       return f1.position.x > 144
     },
@@ -627,7 +723,15 @@ const keyframes = [
     },
   },
   {
-    // F25
+    condition: () => {
+      return f1.position.z < 395
+    },
+    transformation: () => {
+      setCameraMode('followside')
+      return true
+    },
+  },
+  {
     condition: () => {
       return f1.position.z < 363
     },
@@ -638,7 +742,6 @@ const keyframes = [
     },
   },
   {
-    // F25
     condition: () => {
       return f1.position.x < 136
     },
@@ -649,29 +752,44 @@ const keyframes = [
     },
   },
   {
-    // F26
+    condition: () => {
+      return f1.position.z < 330
+    },
+    transformation: () => {
+      setCameraMode('aboveclose')
+      return true
+    },
+  },
+  {
     condition: () => {
       return f1.position.z < 316
     },
     transformation: () => {
-      turnWheels(-Math.PI / 6)
+      turnWheels(Math.PI / 6)
       turnCar((Math.PI * 5) / 4)
       return true
     },
   },
   {
-    // F27
     condition: () => {
       return f1.position.x < 107
     },
     transformation: () => {
-      turnWheels(Math.PI / 6)
+      turnWheels(-Math.PI / 6)
       turnCar(Math.PI)
       return true
     },
   },
   {
-    // F28
+    condition: () => {
+      return f1.position.z < 280
+    },
+    transformation: () => {
+      setCameraMode('sidepod')
+      return true
+    },
+  },
+  {
     condition: () => {
       return f1.position.z < 255.5
     },
@@ -682,18 +800,25 @@ const keyframes = [
     },
   },
   {
-    // F29
     condition: () => {
       return f1.position.x > 134
     },
     transformation: () => {
-      turnWheels(Math.PI / 6)
+      setCameraMode('above')
+      return true
+    },
+  },
+  {
+    condition: () => {
+      return f1.position.x > 134
+    },
+    transformation: () => {
+      turnWheels(-Math.PI / 6)
       turnCar((Math.PI * 3) / 4)
       return true
     },
   },
   {
-    // F30
     condition: () => {
       return f1.position.z < 241
     },
@@ -704,7 +829,6 @@ const keyframes = [
     },
   },
   {
-    // F31
     condition: () => {
       return f1.position.z < 206
     },
@@ -715,29 +839,53 @@ const keyframes = [
     },
   },
   {
-    // F32
+    condition: () => {
+      return f1.position.x < 140
+    },
+    transformation: () => {
+      setCameraMode('ahead')
+      return true
+    },
+  },
+  {
     condition: () => {
       return f1.position.x < 121
     },
     transformation: () => {
-      turnWheels(-Math.PI / 6)
+      turnWheels(Math.PI / 6)
       turnCar((Math.PI * 3) / 2)
       return true
     },
   },
   {
-    // F33
     condition: () => {
       return f1.position.x < 110
     },
     transformation: () => {
-      turnWheels(Math.PI / 6)
+      turnWheels(-Math.PI / 6)
       turnCar(Math.PI)
       return true
     },
   },
   {
-    // F34
+    condition: () => {
+      return f1.position.z < 185
+    },
+    transformation: () => {
+      setCameraMode('sidepod')
+      return true
+    },
+  },
+  {
+    condition: () => {
+      return f1.position.z < 140
+    },
+    transformation: () => {
+      setCameraMode('followfar')
+      return true
+    },
+  },
+  {
     condition: () => {
       return f1.position.z < 102
     },
@@ -748,7 +896,6 @@ const keyframes = [
     },
   },
   {
-    // F35
     condition: () => {
       return f1.position.x > 122
     },
@@ -759,7 +906,15 @@ const keyframes = [
     },
   },
   {
-    // F36
+    condition: () => {
+      return f1.position.z > 130
+    },
+    transformation: () => {
+      setCameraMode('aboveclose')
+      return true
+    },
+  },
+  {
     condition: () => {
       return f1.position.z > 150
     },
@@ -770,7 +925,15 @@ const keyframes = [
     },
   },
   {
-    // F37
+    condition: () => {
+      return f1.position.z < 112
+    },
+    transformation: () => {
+      setCameraMode('above')
+      return true
+    },
+  },
+  {
     condition: () => {
       return f1.position.z < 112
     },
@@ -781,7 +944,6 @@ const keyframes = [
     },
   },
   {
-    // F38
     condition: () => {
       return f1.position.x > 146.5
     },
@@ -792,7 +954,15 @@ const keyframes = [
     },
   },
   {
-    // F39
+    condition: () => {
+      return f1.position.z < 80
+    },
+    transformation: () => {
+      setCameraMode('ahead')
+      return true
+    },
+  },
+  {
     condition: () => {
       return f1.position.z < 63
     },
@@ -803,7 +973,6 @@ const keyframes = [
     },
   },
   {
-    // F40
     condition: () => {
       return f1.position.x > 164
     },
@@ -814,7 +983,6 @@ const keyframes = [
     },
   },
   {
-    // F41
     condition: () => {
       return f1.position.z < 36
     },
@@ -825,7 +993,6 @@ const keyframes = [
     },
   },
   {
-    // F42
     condition: () => {
       return f1.position.x < 151
     },
@@ -835,9 +1002,31 @@ const keyframes = [
       return true
     },
   },
+  {
+    condition: () => {
+      return f1.position.z < 25
+    },
+    transformation: () => {
+      setCameraMode('follow')
+      return true
+    },
+  },
+  {
+    condition: () => {
+      return f1.position.z < 10
+    },
+    transformation: () => {
+      setCameraMode('followfar')
+      return true
+    },
+  },
 ]
 
 const animate = () => {
+  if (pauseAnimation) {
+    return
+  }
+
   const currentKeyframe =
     currentKeyframeIndex < keyframes.length
       ? keyframes[currentKeyframeIndex]
@@ -930,7 +1119,12 @@ const createScene = async () => {
     exposure: 0.5,
   }
 
-  createCamera(window.innerWidth / window.innerHeight)
+  if (fullscreen) {
+    width = window.innerWidth
+    height = window.innerHeight
+  }
+
+  createCamera(width / height)
   scene = new THREE.Scene()
 
   const renderScene = new RenderPass(scene, camera)
@@ -967,7 +1161,7 @@ const createScene = async () => {
     preserveDrawingBuffer: true,
   })
   renderer.setPixelRatio(window.devicePixelRatio)
-  renderer.setSize(window.innerWidth, window.innerHeight)
+  renderer.setSize(width, height)
   renderer.setAnimationLoop(animate)
   renderer.shadowMap.enabled = true
   renderer.toneMapping = THREE.ReinhardToneMapping
@@ -1022,7 +1216,10 @@ const createScene = async () => {
   })
 
   //f1.rotation.y = Math.PI
-  //setAnimationFrame(40, 147.48164755483327, 80.43642102212316)
+  //40 85.98744981120531 485.03427479924113
+  //setAnimationFrame(53, 134.99351353404262, 329.99066023006986)
+  //setAnimationFrame(74, 147.455600116703, 62.91623919408145)
+  //setAnimationFrame(23, 34.306377882892704, 364.2067172283816)
 }
 
 createScene()
