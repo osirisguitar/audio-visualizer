@@ -51,3 +51,29 @@ export const rotateAboutPoint = (
 
   obj.rotateOnAxis(axis, theta) // rotate the OBJECT
 }
+
+export const timeStringFromDuration = (duration) => {
+  const durationMinutes = Math.floor(duration / 60)
+  const durationSeconds = Math.floor(duration % 60)
+  const durationMillis = Math.round(
+    ((duration % 60) - Math.floor(duration % 60)) * 1000
+  )
+
+  let durationString = durationMinutes
+
+  if (durationMinutes < 10) {
+    durationString = '0' + durationString
+  }
+
+  durationString += ':'
+
+  if (durationSeconds < 10) {
+    durationString += '0' + durationSeconds
+  } else {
+    durationString += durationSeconds
+  }
+
+  durationString += ':' + durationMillis
+
+  return durationString
+}

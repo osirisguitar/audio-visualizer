@@ -48,6 +48,11 @@ const cameraModes = {
     lookat: new THREE.Vector3(0, 0, 0.1),
     dynamic: true,
   },
+  followexit: {
+    camera: new THREE.Vector3(147.66, 1.5, 4),
+    lookat: new THREE.Vector3(147.66, 0, 0),
+    dynamic: false,
+  },
   ahead: {
     camera: new THREE.Vector3(0, 0.2, 1),
     lookat: new THREE.Vector3(0, 0, -1),

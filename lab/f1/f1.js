@@ -5,7 +5,11 @@ import { ShaderPass } from 'three/addons'
 import { UnrealBloomPass } from 'three/addons'
 import { OutputPass } from 'three/addons'
 import { logo, createLogo, setLogoColors } from './logo'
-import { loadModel, rotateAboutPoint } from '../../public/utils'
+import {
+  loadModel,
+  rotateAboutPoint,
+  timeStringFromDuration,
+} from '../../public/utils'
 import { camera, createCamera, setCameraMode, updateCamera } from './camera'
 
 let audio1 = new Audio()
@@ -35,7 +39,7 @@ bloomLayer.set(BLOOM_SCENE)
 const darkMaterial = new THREE.MeshBasicMaterial({ color: 'black' })
 const materials = {}
 
-let fullscreen = true
+let fullscreen = false
 let width = 1280
 let height = 720
 
@@ -53,6 +57,7 @@ let rightRearWheel
 let keyRotationObject
 let floor
 let pauseAnimation = false
+const timeDiv = document.getElementById('time')
 
 const createAmbientLight = (color) => {
   return new THREE.AmbientLight(color)
@@ -733,6 +738,15 @@ const keyframes = [
   },
   {
     condition: () => {
+      return f1.position.z < 375
+    },
+    transformation: () => {
+      setCameraMode('onboard')
+      return true
+    },
+  },
+  {
+    condition: () => {
       return f1.position.z < 363
     },
     transformation: () => {
@@ -1007,16 +1021,25 @@ const keyframes = [
       return f1.position.z < 25
     },
     transformation: () => {
+      setCameraMode('followfar')
+      return true
+    },
+  },
+  {
+    condition: () => {
+      return f1.position.z < 12
+    },
+    transformation: () => {
       setCameraMode('follow')
       return true
     },
   },
   {
     condition: () => {
-      return f1.position.z < 10
+      return f1.position.z < 3
     },
     transformation: () => {
-      setCameraMode('followfar')
+      setCameraMode('followexit')
       return true
     },
   },
@@ -1101,6 +1124,10 @@ const animate = () => {
 
   analyser.getByteFrequencyData(dataArray)
   setLogoColors(dataArray)
+
+  if (audio1.currentTime < 280) {
+    timeDiv.innerText = timeStringFromDuration(audio1.currentTime)
+  }
 
   render()
 }
@@ -1220,6 +1247,8 @@ const createScene = async () => {
   //setAnimationFrame(53, 134.99351353404262, 329.99066023006986)
   //setAnimationFrame(74, 147.455600116703, 62.91623919408145)
   //setAnimationFrame(23, 34.306377882892704, 364.2067172283816)
+  //setAnimationFrame(41, 86.00016801719285, 453.35208153515526)
+  //setAnimationFrame(77, 167.29522079634702, 51.9202690424194)
 }
 
 createScene()

@@ -6,9 +6,50 @@
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <link rel="stylesheet" href="/stylesheet.css" />
   <title>3D Visualizer</title>
+  <style type="text/css">
+    .f1 {
+      background-color: rgba(0, 0, 0, 0.5);
+      position: absolute;
+      font-family: 'Formula1';
+      padding: 10px;
+      left: 20px;
+      top: 590px;
+    }
+
+    .f1Driver {
+      color: orange;
+      font-size: 1.5em;
+    }
+
+    .f1Team {
+      color: cyan;
+    }
+
+    .pos {
+      color: white;
+      font-size: 2em;
+      margin-right: 10px
+    }
+
+    .time {
+      color: white;
+      font-size: 2em;
+    }
+  </style>
 </head>
 
 <body>
+  <div class="f1">
+    <div style="display:flex">
+      <div class="f1Driver">OSIRIS DREAMS <img src="sv.png" style="height: 20px; margin-left:2px">
+      </div>
+    </div>
+    <div class="f1Team">HYPER-DIMENSIONAL RACING TEAM</div>
+    <div style="display:flex">
+      <div class="pos">P1</div>
+      <div class="time" id="time"></div>
+    </div>
+  </div>
   <script type="module" src="f1.js"></script>
 </body>
 
