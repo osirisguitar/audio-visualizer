@@ -14,5 +14,5 @@ $:>nvm use
 $:>npm i
 $:>npm run dev
 
-Browse to http://localhost:5173/lab/f1/
+Browse to http://localhost:5173
 ```

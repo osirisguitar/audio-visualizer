@@ -39,7 +39,7 @@ bloomLayer.set(BLOOM_SCENE)
 const darkMaterial = new THREE.MeshBasicMaterial({ color: 'black' })
 const materials = {}
 
-let fullscreen = false
+let fullscreen = true
 let width = 1280
 let height = 720
 

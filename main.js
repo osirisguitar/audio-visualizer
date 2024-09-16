@@ -1,24 +1,16 @@
 import './style.css'
-import javascriptLogo from './javascript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.js'
 
 document.querySelector('#app').innerHTML = `
   <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
+    <h1>Audio Visualizer Experiments</h1>
+    <ul class="read-the-docs">
+      <li><a href="/lab/f1/">Hyper-Dimensional Racing (official music video)</a></li>
+      <li><a href="/lab/moon/">Moon (only 3d, no audio)</a></li>
+      <li><a href="/lab/moon/">Simple 2D bars</a></li>
+      <li><a href="/lab/moon/">3D bars</a></li>
+      <li><a href="/lab/moon/">3D bars + spaceship model</a></li>
+      <li><a href="/lab/moon/">3D bars + spaceship model (camera movement)</a></li>
+      <li><a href="/lab/moon/">3D bars + spaceship model (more camera movement)</a></li>
+    </ul>
   </div>
 `
-
-setupCounter(document.querySelector('#counter'))
