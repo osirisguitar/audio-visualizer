@@ -1,6 +1,6 @@
 let audio1 = new Audio()
 audio1.src =
-  'OSIRIS DREAMS - The Cybergenix Conspiracy - 01 Biomechanoid Prototype.mp3'
+  'OSIRIS DREAMS - The Cybergenix Conspiracy - 02 Emerging Sentience.mp3'
 
 const container = document.getElementById('container')
 const canvas = document.getElementById('canvas')
