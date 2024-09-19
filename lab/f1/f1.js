@@ -76,7 +76,7 @@ const createDirectionalLight = (color, intensity) => {
 
 const createF1 = async () => {
   try {
-    let f1Model = await loadModel('formula1b.glb')
+    let f1Model = await loadModel('/formula1b.glb')
     f1Model.receiveShadow = true
     let f1 = f1Model
     f1.scale.set(0.1, 0.1, 0.1)
