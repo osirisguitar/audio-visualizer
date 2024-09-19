@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { loadModel } from '../../public/utils'
+import { loadModel } from './utils'
 
 const logoBaseColors = new Array(2)
 const lastFrequencies = [0, 0]

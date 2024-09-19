@@ -1,10 +1,9 @@
 import * as THREE from 'three'
-import { GLTFLoader } from 'https://unpkg.com/three/examples/jsm/loaders/GLTFLoader.js'
+import { GLTFLoader } from 'three/addons'
 
 let audio1 = new Audio()
 audio1.src =
-  'OSIRIS DREAMS - The Cybergenix Conspiracy - 02 Emerging Sentience.mp3'
-//'OSIRIS DREAMS - The Cybergenix Conspiracy - 01 Biomechanoid Prototype.mp3'
+  '/OSIRIS DREAMS - The Cybergenix Conspiracy - 02 Emerging Sentience.mp3'
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
 let audioSource = null
@@ -147,18 +146,13 @@ async function init() {
 
   const loader = new GLTFLoader()
 
-  loader.load('osiris-dreams-logo.glb', (logoModel) => {
-    logoModel.scene.traverse((obj) => {
-      if (obj.name === 'path2') {
-        console.log(obj.material)
-      }
-    })
+  loader.load('/osiris-dreams-logo.glb', (logoModel) => {
     logoModel.scene.scale.set(20, 20, 20)
     logoModel.scene.position.set(0, -25, -60)
     scene.add(logoModel.scene)
   })
 
-  loader.load('spaceship/scene.gltf', (shipModel) => {
+  loader.load('/spaceship/scene.gltf', (shipModel) => {
     shipModel.scene.scale.set(0.15, 0.15, 0.15)
     shipModel.scene.position.set(0, 0.2, 0)
     shipModel.scene.rotation.set(0, 1.508, -0.75)

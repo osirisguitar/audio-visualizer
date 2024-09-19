@@ -8,9 +8,9 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         moon: resolve(__dirname, 'lab/moon/index.html'),
-        shader: resolve(__dirname, 'lab/shader/index.html'),
         f1: resolve(__dirname, 'lab/f1/index.html'),
         model: resolve(__dirname, 'lab/model/index.html'),
+        model2: resolve(__dirname, 'lab/model2/index.html'),
       },
     },
   },
